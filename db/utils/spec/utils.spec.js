@@ -151,7 +151,7 @@ describe('formatDates', () => {
 			expect(testArr).to.eql(testArrCopy);
 		});
 	});
-	describe('formatComments', () => {
+	describe.only('formatComments', () => {
 		it('takes an array and returns an array', () => {
 			const testArr = [];
 			const actual = formatComments(testArr);
@@ -169,8 +169,8 @@ describe('formatDates', () => {
 					created_at: 1468087638932
 				}
 			];
-			const testRefObj = { tickle122: 1 };
-			const actual = formatComments(testArr, testRefObj, 'created_by', 'belongs_to', 'author', 'article_id');
+			const testRefObj = { 'The People Tracking Every Touch, Pass And Tackle in the World Cup': 1 };
+			const actual = formatComments(testArr, testRefObj);
 			const expected = [
 				{
 					body:
@@ -202,10 +202,10 @@ describe('formatDates', () => {
 				}
 			];
 			const testRefObj = {
-				tickle122: 1,
-				grumpy19: 2
+				'The People Tracking Every Touch, Pass And Tackle in the World Cup': 1,
+				'Making sense of Redux': 2
 			};
-			const actual = formatComments(testArr, testRefObj, 'created_by', 'belongs_to', 'author', 'article_id');
+			const actual = formatComments(testArr, testRefObj);
 			const expected = [
 				{
 					body:
@@ -246,9 +246,8 @@ describe('formatDates', () => {
 					created_at: 1468087638932
 				}
 			];
-			const testRefObj = { tickle122: 1 };
-			const actual = formatComments(testArr, testRefObj, 'created_by', 'belongs_to', 'author', 'article_id');
-
+			const testRefObj = { 'The People Tracking Every Touch, Pass And Tackle in the World Cup': 1 };
+			formatComments(testArr, testRefObj);
 			expect(testArr).to.eql(testArrCopy);
 		});
 	});

@@ -21,10 +21,10 @@ exports.formatComments = (comments, articleRef, oldKeyOne, oldKeyTwo, newKeyOne,
 	const newObjs = newArr.map((commentObj) => ({ ...commentObj }));
 
 	newObjs.forEach((commentObj) => {
-		(commentObj[newKeyOne] = commentObj[oldKeyOne]),
-			(commentObj[newKeyTwo] = articleRef[commentObj[oldKeyOne]]),
-			delete commentObj[oldKeyOne];
-		delete commentObj[oldKeyTwo];
+		commentObj.author = commentObj.created_by;
+		commentObj.article_id = articleRef[commentObj.belongs_to];
+		delete commentObj.created_by;
+		delete commentObj.belongs_to;
 	});
 
 	return newObjs;

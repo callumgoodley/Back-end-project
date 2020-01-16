@@ -97,7 +97,7 @@ Each comment should have:
 - `body`
 
 - **NOTE:** psql expects `Timestamp` types to be in a specific date format - **not a unix timestamp** as they are in our data! However, you can easily **re-format a unix timestamp into something compatible with our database using JS - you will be doing this in your utility function**... [JavaScript Date object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
-
+'comment
 ### Seeding
 
 You need to complete the provided seed function to insert the appropriate data into your database.
@@ -209,7 +209,7 @@ GET /api/articles/:article_id
   - `votes`
   - `comment_count` which is the total count of all the comments with this article_id - you should make use of knex queries in order to achieve this
 
----
+
 
 ```http
 PATCH /api/articles/:article_id
