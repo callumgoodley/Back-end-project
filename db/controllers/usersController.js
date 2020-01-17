@@ -3,7 +3,7 @@ const { selectUsers, selectUsersById } = require('../models/usersModel');
 const getUsers = (req, res, next) => {
 	selectUsers()
 		.then((user) => {
-			res.status(200).send({ user });
+			res.status(200).send(user);
 		})
 		.catch(next);
 };

@@ -1,7 +1,10 @@
 const connection = require('../connection');
 
-const selectArticles = () => {
-	return connection.select('*').from('articles');
+const selectArticles = (query) => {
+	const { sort_by = 'created_at', order_by = 'desc' } = query;
+	return connection.select('*').from('articles').orderBy(sort_by, order_by).then((articles) => {
+		return articles;
+	});
 };
 
 const selectArticlesById = (article_id) => {
@@ -48,10 +51,36 @@ const incrementVote = (incrementBy, article_id) => {
 		});
 };
 
-const postComment = () => {
-	console.log('HELLO');
+const insertComment = (comment, article_id) => {
+	const formatComment = { ...comment };
+	formatComment.author = formatComment.username;
+	formatComment.article_id = article_id;
+	delete formatComment.username;
+
+	return connection('comments')
+		.insert(formatComment)
+		.returning('*')
+		.where({
+			article_id: formatComment.article_id,
+			body: formatComment.body,
+			author: formatComment.author
+		})
+		.then((comment) => {
+			return comment[0];
+		});
 };
 
-// for changeArticle we're adding one to the vote - don't use update something similar that accounts for everything you care about looking after
+const selectComments = (article_id, query) => {
+	return connection
+		.select('*')
+		.from('comments')
+		.where({
+			article_id: article_id
+		})
+		.orderBy(query.sort_by || 'created_at', query.order_by || 'desc')
+		.then((comments) => {
+			return comments;
+		});
+};
 
-module.exports = { selectArticles, selectArticlesById, incrementVote, postComment };
+module.exports = { selectArticles, selectArticlesById, incrementVote, selectComments, insertComment };

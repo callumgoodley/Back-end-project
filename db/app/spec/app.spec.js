@@ -12,17 +12,17 @@ describe('/api', () => {
 	after(() => connection.destroy());
 	describe('/topics', () => {
 		it('GET 200: responds with an array of topic objects', () => {
-			return request(app).get('/api/topics').expect(200).then((topics) => {
-				expect(topics.body.topics).to.be.an('array');
-				expect(topics.body.topics[0]).to.contain.keys('slug', 'description');
+			return request(app).get('/api/topics').expect(200).then((res) => {
+				expect(res.body).to.be.an('array');
+				expect(res.body[0]).to.contain.keys('slug', 'description');
 			});
 		});
 	});
 	describe('/users', () => {
-		it('GET 200: responds with an array of user topic objects', () => {
+		it('GET 200: responds with an array of user user objects', () => {
 			return request(app).get('/api/users').then((user) => {
-				expect(user.body.user).to.be.an('array');
-				expect(user.body.user[0]).to.contain.keys('username', 'name', 'avatar_url');
+				expect(user.body).to.be.an('array');
+				expect(user.body[0]).to.contain.keys('username', 'name', 'avatar_url');
 			});
 		});
 		describe('/:username', () => {
@@ -38,11 +38,12 @@ describe('/api', () => {
 			});
 		});
 	});
+
 	describe('/articles', () => {
-		it('GET 200: responds with an array of topic objects', () => {
+		it('GET 200: responds with an array of article objects', () => {
 			return request(app).get('/api/articles').expect(200).then((articles) => {
-				expect(articles.body.articles).to.be.an('array');
-				expect(articles.body.articles[0]).to.contain.keys(
+				expect(articles.body).to.be.an('array');
+				expect(articles.body[0]).to.contain.keys(
 					'article_id',
 					'title',
 					'body',
@@ -51,6 +52,16 @@ describe('/api', () => {
 					'author',
 					'created_at'
 				);
+			});
+		});
+		it('GET 200: responds with an array of comment objects sorted by the author specified in query and ordered as specified', () => {
+			return request(app).get('/api/articles?sort_by=author&&order_by=asc').expect(200).then((res) => {
+				expect(res.body).to.be.sortedBy('author', { ascending: true });
+			});
+		});
+		it('GET 200: responds with an array of comment objects sorted by the topic specified in query and ordered as specified', () => {
+			return request(app).get('/api/articles?sort_by=author&&order_by=asc').expect(200).then((res) => {
+				expect(res.body).to.be.sortedBy('author', { ascending: true });
 			});
 		});
 		describe('/:article_id', () => {
@@ -92,14 +103,50 @@ describe('/api', () => {
 				return request(app).get('/api/articles/43g364').expect(400);
 			});
 			describe('/comments', () => {
-				it.only('takes an object of username and body then responds with users comment', () => {
+				it('POST 201: takes an object of username and body then responds with users comment', () => {
 					return request(app)
-						.get('/api/articles/1/comments')
-						.send({ username: 'callumG', body: 'I love coding' })
+						.post('/api/articles/1/comments')
+						.send({ username: 'butter_bridge', body: 'VERY NICE' })
 						.expect(201)
 						.then((res) => {
-							console.log(res.body);
-							expect(res.body).to.eql({ username: 'callumG', body: 'I love coding' });
+							expect(res.body).to.be.an('object');
+							expect(res.body).to.contain.keys(
+								'comment_id',
+								'author',
+								'article_id',
+								'votes',
+								'created_at',
+								'body'
+							);
+							expect(res.body.author).to.equal('butter_bridge');
+							expect(res.body.body).to.equal('VERY NICE');
+						});
+				});
+				it('GET 200: responds with an array of comments for a given article', () => {
+					return request(app).get('/api/articles/1/comments').expect(200).then((res) => {
+						expect(res.body).to.be.an('array');
+						expect(res.body[0]).to.contain.keys(
+							'comment_id',
+							'author',
+							'article_id',
+							'votes',
+							'created_at',
+							'body'
+						);
+						expect(res.body[0].article_id).to.equal(1);
+					});
+				});
+				it('GET 200: responds with an array of comment objects ordered most recent first as a default i.e. created_at & descending', () => {
+					return request(app).get('/api/articles/1/comments').expect(200).then((res) => {
+						expect(res.body).to.be.sortedBy('created_at', { descending: true });
+					});
+				});
+				it('GET 200: responds with an array of comment objects sorted by the column specified in query and ordered as specified', () => {
+					return request(app)
+						.get('/api/articles/1/comments?sort_by=votes&&order_by=asc')
+						.expect(200)
+						.then((res) => {
+							expect(res.body).to.be.sortedBy('votes', { ascending: true });
 						});
 				});
 			});

@@ -1,9 +1,16 @@
-const { selectArticles, selectArticlesById, incrementVote, postComment } = require('../models/articlesModel');
+const {
+	selectArticles,
+	selectArticlesById,
+	incrementVote,
+	selectComments,
+	insertComment
+} = require('../models/articlesModel');
 
 const getArticles = (req, res, next) => {
-	selectArticles()
+	const query = req.query;
+	selectArticles(query)
 		.then((articles) => {
-			res.status(200).send({ articles });
+			res.status(200).send(articles);
 		})
 		.catch(next);
 };
@@ -26,9 +33,22 @@ const addToArticleVotes = (req, res, next) => {
 		})
 		.catch(next);
 };
-const addArticleComment = () => {
-	console.log('HELLO');
-	postComment();
+
+const addComment = (req, res, next) => {
+	const commentObj = req.body;
+	const article_id = req.params.article_id;
+
+	insertComment(commentObj, article_id).then((comment) => {
+		res.status(201).send({ comment }.comment);
+	});
 };
 
-module.exports = { getArticles, getArticlesById, addToArticleVotes, addArticleComment };
+const getArticleComments = (req, res, next) => {
+	const article_id = req.params.article_id;
+	const query = req.query;
+	selectComments(article_id, query).then((comment) => {
+		res.status(200).send({ comment }.comment);
+	});
+};
+
+module.exports = { getArticles, getArticlesById, addToArticleVotes, getArticleComments, addComment };
