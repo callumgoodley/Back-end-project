@@ -1,10 +1,18 @@
 const connection = require('../connection');
 
-const selectArticles = (query) => {
-	const { sort_by = 'created_at', order_by = 'desc' } = query;
-	return connection.select('*').from('articles').orderBy(sort_by, order_by).then((articles) => {
-		return articles;
-	});
+const selectArticles = (queryObj) => {
+	console.log(queryObj);
+	return connection
+		.select('*')
+		.from('articles')
+		.orderBy(queryObj.sort_by || 'created_at', queryObj.order_by || 'desc')
+		.modify((query) => {
+			if (queryObj.author) query.where({ author: queryObj.author });
+			if (queryObj.topic) query.where({ topic: queryObj.topic });
+		})
+		.then((articles) => {
+			return articles;
+		});
 };
 
 const selectArticlesById = (article_id) => {

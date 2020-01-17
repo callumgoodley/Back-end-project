@@ -54,14 +54,46 @@ describe('/api', () => {
 				);
 			});
 		});
-		it('GET 200: responds with an array of comment objects sorted by the author specified in query and ordered as specified', () => {
-			return request(app).get('/api/articles?sort_by=author&&order_by=asc').expect(200).then((res) => {
-				expect(res.body).to.be.sortedBy('author', { ascending: true });
+		it('GET 200: responds with an array of article objects sorted by the created_at in descending order as default', () => {
+			return request(app).get('/api/articles').expect(200).then((res) => {
+				expect(res.body).to.be.an('array');
+				expect(res.body).to.be.sortedBy('created_at', { descending: true });
 			});
 		});
-		it('GET 200: responds with an array of comment objects sorted by the topic specified in query and ordered as specified', () => {
-			return request(app).get('/api/articles?sort_by=author&&order_by=asc').expect(200).then((res) => {
-				expect(res.body).to.be.sortedBy('author', { ascending: true });
+		it('GET 200: responds with an array of article objects sorted by the topic specified in query and ordered as specified', () => {
+			return request(app).get('/api/articles?sort_by=votes&&order_by=asc').expect(200).then((res) => {
+				expect(res.body).to.be.an('array');
+				expect(res.body).to.be.sortedBy('votes', { ascending: true });
+			});
+		});
+		it.only('GET 200: responds with an array of article objects by a certain author', () => {
+			return request(app).get('/api/articles?author=icellusedkars').expect(200).then((res) => {
+				expect(res.body).to.be.an('array');
+				expect(res.body[0]).to.contain.keys(
+					'article_id',
+					'title',
+					'body',
+					'votes',
+					'topic',
+					'author',
+					'created_at'
+				);
+				expect(res.body[0].author).to.equal('icellusedkars');
+			});
+		});
+		it.only('GET 200: responds with an array of article objects that on a certain topic', () => {
+			return request(app).get('/api/articles?topic=cats').expect(200).then((res) => {
+				expect(res.body).to.be.an('array');
+				expect(res.body[0]).to.contain.keys(
+					'article_id',
+					'title',
+					'body',
+					'votes',
+					'topic',
+					'author',
+					'created_at'
+				);
+				expect(res.body[0].topic).to.equal('cats');
 			});
 		});
 		describe('/:article_id', () => {
