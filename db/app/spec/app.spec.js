@@ -143,8 +143,8 @@ describe('/api', () => {
 				expect(res.body.articles[0].author).to.equal('icellusedkars');
 			});
 		});
-		it('GET 404: responds with 404 not found when provided with a non-existent author', () => {
-			return request(app).get('/api/articles/not-an-author').expect(404);
+		it('GET 400: responds with 400 not found when provided with a non-existent author', () => {
+			return request(app).get('/api/articles/not-an-author').expect(400);
 		});
 		it('GET 200: responds with an array of article objects that on a certain topic', () => {
 			return request(app).get('/api/articles?topic=cats').expect(200).then((res) => {
@@ -162,7 +162,7 @@ describe('/api', () => {
 			});
 		});
 		it('GET 404: responds with 404 not found when provided with a non-existent topic', () => {
-			return request(app).get('/api/articles/not-a-topic').expect(404);
+			return request(app).get('/api/articles/?topic=not-a-topic').expect(404);
 		});
 		it('INVALID METHOD 405', () => {
 			const invalidMethods = [ 'patch', 'put', 'delete' ];

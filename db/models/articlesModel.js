@@ -10,6 +10,12 @@ const selectArticles = (queryObj) => {
 			if (queryObj.topic) query.where({ topic: queryObj.topic });
 		})
 		.then((articles) => {
+			console.log(articles);
+			if (articles.length === 0)
+				return Promise.reject({
+					status: 404,
+					msg: 'Not Found'
+				});
 			return articles;
 		});
 };
@@ -89,7 +95,7 @@ const selectComments = (article_id, query) => {
 			if (typeof article_id !== 'number')
 				return Promise.reject({
 					status: 404,
-					msg: 'Bad request'
+					msg: 'Not found'
 				});
 			return comments;
 		});
