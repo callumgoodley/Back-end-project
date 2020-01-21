@@ -10,7 +10,7 @@ const getArticles = (req, res, next) => {
 	const query = req.query;
 	selectArticles(query)
 		.then((articles) => {
-			res.status(200).send(articles);
+			res.status(200).send({ articles });
 		})
 		.catch(next);
 };
@@ -38,17 +38,25 @@ const addComment = (req, res, next) => {
 	const commentObj = req.body;
 	const article_id = req.params.article_id;
 
-	insertComment(commentObj, article_id).then((comment) => {
-		res.status(201).send({ comment }.comment);
-	});
+	insertComment(commentObj, article_id)
+		.then((comment) => {
+			res.status(201).send({ comment }.comment);
+		})
+		.catch(next);
 };
 
 const getArticleComments = (req, res, next) => {
 	const article_id = req.params.article_id;
 	const query = req.query;
-	selectComments(article_id, query).then((comment) => {
-		res.status(200).send({ comment }.comment);
-	});
+	selectComments(article_id, query)
+		.then((comments) => {
+			if (comments.length === 0) {
+				res.status(404).send({ msg: 'Not found' });
+			} else {
+				res.status(200).send({ comments });
+			}
+		})
+		.catch(next);
 };
 
 module.exports = { getArticles, getArticlesById, addToArticleVotes, getArticleComments, addComment };

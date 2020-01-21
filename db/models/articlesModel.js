@@ -1,7 +1,6 @@
 const connection = require('../connection');
 
 const selectArticles = (queryObj) => {
-	console.log(queryObj);
 	return connection
 		.select('*')
 		.from('articles')
@@ -45,10 +44,10 @@ const incrementVote = (incrementBy, article_id) => {
 		.groupBy('articles.article_id')
 		.where('articles.article_id', article_id)
 		.then((article) => {
-			if (!article)
+			if (typeof incrementBy !== 'number')
 				return Promise.reject({
-					status: 404,
-					msg: 'Not found'
+					status: 400,
+					msg: 'Bad request'
 				});
 			article.comment_count = Number(article.comment_count);
 			return article;
@@ -87,6 +86,11 @@ const selectComments = (article_id, query) => {
 		})
 		.orderBy(query.sort_by || 'created_at', query.order_by || 'desc')
 		.then((comments) => {
+			if (typeof article_id !== 'number')
+				return Promise.reject({
+					status: 404,
+					msg: 'Bad request'
+				});
 			return comments;
 		});
 };

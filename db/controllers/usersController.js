@@ -2,8 +2,8 @@ const { selectUsers, selectUsersById } = require('../models/usersModel');
 
 const getUsers = (req, res, next) => {
 	selectUsers()
-		.then((user) => {
-			res.status(200).send(user);
+		.then((users) => {
+			res.status(200).send({ users });
 		})
 		.catch(next);
 };
