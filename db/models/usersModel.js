@@ -5,13 +5,13 @@ const selectUsers = () => {
 };
 
 const selectUsersById = (username) => {
-	return connection('users').first('*').where('username', username).then((result) => {
-		if (!result)
+	return connection('users').first('*').where('username', username).then((user) => {
+		if (!user)
 			return Promise.reject({
 				status: 404,
 				msg: 'Not found'
 			});
-		return result;
+		return { user };
 	});
 };
 

@@ -12,6 +12,7 @@ const selectCommentById = (comment_id) => {
 
 const incrementVote = (incrementBy, comment_id) => {
 	return connection('comments').first('*').where('comment_id', comment_id).then((comment) => {
+		if (!incrementBy) return comment;
 		comment.votes += incrementBy;
 		return comment;
 	});

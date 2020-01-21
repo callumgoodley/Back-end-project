@@ -10,6 +10,15 @@ const types = require('pg').types;
 describe('/api', () => {
 	beforeEach(() => connection.seed.run());
 	after(() => connection.destroy());
+	it('INVALID METHOD 405', () => {
+		const invalidMethods = [ 'delete' ];
+		const methodPromises = invalidMethods.map((method) => {
+			return request(app)[method]('/api/topics').expect(405).then(({ body: { msg } }) => {
+				expect(msg).to.equal('method not allowed');
+			});
+		});
+		return Promise.all(methodPromises);
+	});
 	describe('/topics', () => {
 		it('GET 200: responds with an array of topic objects', () => {
 			return request(app).get('/api/topics').expect(200).then((res) => {
@@ -41,64 +50,22 @@ describe('/api', () => {
 		it('GET 200: responds with a specified user object according to username', () => {
 			return request(app).get('/api/users/butter_bridge').expect(200).then((res) => {
 				expect(res.body).to.be.an('object');
-				expect(res.body).to.contain.keys('username', 'name', 'avatar_url');
-				expect(res.body.username).to.equal('butter_bridge');
+				expect(res.body.user).to.be.an('object');
+				expect(res.body.user).to.contain.keys('username', 'name', 'avatar_url');
+				expect(res.body.user.username).to.equal('butter_bridge');
 			});
+		});
+		it('INVALID METHOD 405', () => {
+			const invalidMethods = [ 'put' ];
+			const methodPromises = invalidMethods.map((method) => {
+				return request(app)[method]('/api/topics').expect(405).then(({ body: { msg } }) => {
+					expect(msg).to.equal('method not allowed');
+				});
+			});
+			return Promise.all(methodPromises);
 		});
 		it('GET 404: responds with 404 not found when a request is made on for username that does not exist', () => {
 			return request(app).get('/api/users/callumgoodley').expect(404);
-		});
-		// it('GET 400: responds with 400 bad request when a request is made that is not recognised as valid', () => {
-		// 	return request(app).get('/api/users/1993').expect(400);
-		// });
-	});
-	describe('/comments', () => {
-		it('GET 200: responds with an array of comments', () => {
-			return request(app).get('/api/comments').expect(200).then((res) => {
-				expect(res.body).to.be.an('object');
-				expect(res.body.comments).to.be.an('array');
-				expect(res.body.comments[0]).to.contain.keys(
-					'comment_id',
-					'author',
-					'article_id',
-					'votes',
-					'created_at',
-					'body'
-				);
-			});
-		});
-		describe('/:comment_id', () => {
-			it('GET 200: responds with a comment according to specified comment_id', () => {
-				return request(app).get('/api/comments/1').expect(200).then((res) => {
-					expect(res.body).to.be.an('object');
-					expect(res.body).to.contain.keys(
-						'comment_id',
-						'author',
-						'article_id',
-						'votes',
-						'created_at',
-						'body'
-					);
-					expect(res.body.comment_id).to.equal(1);
-				});
-			});
-			it('PATCH 200: takes increment votes obj and adds the value to comments votes', () => {
-				return request(app).patch('/api/comments/1').send({ inc_votes: -1 }).expect(200).then((res) => {
-					expect(res.body).to.be.an('object');
-					expect(res.body).to.contain.keys(
-						'comment_id',
-						'author',
-						'article_id',
-						'votes',
-						'created_at',
-						'body'
-					);
-					expect(res.body.votes).to.equal(15);
-				});
-			});
-			it('DELETE 204: deletes specified comment according to comment_id', () => {
-				return request(app).delete('/api/comments/1').expect(204);
-			});
 		});
 	});
 	describe('/articles', () => {
@@ -234,8 +201,8 @@ describe('/api', () => {
 						.send({ username: 'butter_bridge', body: 'VERY NICE' })
 						.expect(201)
 						.then((res) => {
-							expect(res.body).to.be.an('object');
-							expect(res.body).to.contain.keys(
+							expect(res.body.comment).to.be.an('object');
+							expect(res.body.comment).to.contain.keys(
 								'comment_id',
 								'author',
 								'article_id',
@@ -243,13 +210,13 @@ describe('/api', () => {
 								'created_at',
 								'body'
 							);
-							expect(res.body.author).to.equal('butter_bridge');
-							expect(res.body.body).to.equal('VERY NICE');
+							expect(res.body.comment.author).to.equal('butter_bridge');
+							expect(res.body.comment.body).to.equal('VERY NICE');
 						});
 				});
 				it('GET 200: responds with an array of comment objects ordered most recent first as a default i.e. created_at & descending', () => {
 					return request(app).get('/api/articles/1/comments').expect(200).then((res) => {
-						expect(res.body).to.be.sortedBy('created_at', { descending: true });
+						expect(res.body.comments).to.be.sortedBy('created_at', { descending: true });
 					});
 				});
 				it('GET 200: responds with an array of comment objects sorted by the column specified in query and ordered as specified', () => {
@@ -257,15 +224,122 @@ describe('/api', () => {
 						.get('/api/articles/1/comments?sort_by=votes&&order_by=asc')
 						.expect(200)
 						.then((res) => {
-							expect(res.body).to.be.sortedBy('votes', { ascending: true });
+							expect(res.body.comments).to.be.sortedBy('votes', { ascending: true });
 						});
 				});
 				it('GET 404: responds with 404 not found when given an article number that does not exist', () => {
 					return request(app).get('/api/articles/1000000/comments').expect(404);
 				});
-				it('GET', () => {
+				it('GET 400: responds with 400 when not a valid request', () => {
 					return request(app).get('/api/articles/not-a-valid-id/comments').expect(400);
 				});
+				it('GET 400: repsonds with 400 when not valid query', () => {
+					return request(app).get('/api/articles/1/comments?sort_by=not-a-valid-column').expect(400);
+				});
+				it('INVALID METHOD 405', () => {
+					const invalidMethods = [ 'patch', 'put', 'delete' ];
+					const methodPromises = invalidMethods.map((method) => {
+						return request(app)
+							[method]('/api/articles/1/comments')
+							.expect(405)
+							.then(({ body: { msg } }) => {
+								expect(msg).to.equal('method not allowed');
+							});
+					});
+					return Promise.all(methodPromises);
+				});
+			});
+		});
+	});
+	describe('/comments', () => {
+		it('GET 200: responds with an array of comments', () => {
+			return request(app).get('/api/comments').expect(200).then((res) => {
+				expect(res.body).to.be.an('object');
+				expect(res.body.comments).to.be.an('array');
+				expect(res.body.comments[0]).to.contain.keys(
+					'comment_id',
+					'author',
+					'article_id',
+					'votes',
+					'created_at',
+					'body'
+				);
+			});
+		});
+		it('INVALID METHOD 405', () => {
+			const invalidMethods = [ 'patch', 'put', 'delete' ];
+			const methodPromises = invalidMethods.map((method) => {
+				return request(app)[method]('/api/articles/1/comments').expect(405).then(({ body: { msg } }) => {
+					expect(msg).to.equal('method not allowed');
+				});
+			});
+			return Promise.all(methodPromises);
+		});
+		describe('/:comment_id', () => {
+			it('GET 200: responds with a comment according to specified comment_id', () => {
+				return request(app).get('/api/comments/1').expect(200).then((res) => {
+					expect(res.body).to.be.an('object');
+					expect(res.body).to.contain.keys(
+						'comment_id',
+						'author',
+						'article_id',
+						'votes',
+						'created_at',
+						'body'
+					);
+					expect(res.body.comment_id).to.equal(1);
+				});
+			});
+			it('PATCH 200: takes increment votes obj and adds the value to comments votes', () => {
+				return request(app).patch('/api/comments/1').send({ inc_votes: -1 }).expect(200).then((res) => {
+					expect(res.body).to.be.an('object');
+					expect(res.body.comment).to.be.an('object');
+					expect(res.body.comment).to.contain.keys(
+						'comment_id',
+						'author',
+						'article_id',
+						'votes',
+						'created_at',
+						'body'
+					);
+					expect(res.body.comment.votes).to.equal(15);
+				});
+			});
+			it('PATCH 400: responds with 400 bad request when invalid request is made', () => {
+				return request(app).patch('/api/comments/1').send({ inc_votes: 'abc' }).expect(400);
+			});
+			it('PATCH 200: responds with unchanged comment when sent an no inc_votes value on body', () => {
+				return request(app).patch('/api/comments/1').send({}).expect(200).then((res) => {
+					expect(res.body).to.be.an('object');
+					expect(res.body.comment).to.be.an('object');
+					expect(res.body.comment).to.contain.keys(
+						'comment_id',
+						'author',
+						'article_id',
+						'votes',
+						'created_at',
+						'body'
+					);
+					expect(res.body.comment.votes).to.equal(16);
+				});
+			});
+			it('PATCH 400: responds with 400 bad request when when passed an invalid comment_id', () => {
+				return request(app).patch('/api/comments/not-a-valid-id').send({ inc_votes: 0 }).expect(400);
+			});
+			it('INVALID METHOD 405', () => {
+				const invalidMethods = [ 'put' ];
+				const methodPromises = invalidMethods.map((method) => {
+					return request(app)[method]('/api/comments/1').expect(405).then(({ body: { msg } }) => {
+						expect(msg).to.equal('method not allowed');
+					});
+				});
+				return Promise.all(methodPromises);
+			});
+			it('DELETE 204: deletes specified comment according to comment_id', () => {
+				return request(app).delete('/api/comments/1').expect(204);
+			});
+			it('DELETE 400: responds with 400 when passed an invalid comment to delete', () => {
+				return request(app).delete('/api/comments/not-a-number').expect(400);
 			});
 		});
 	});

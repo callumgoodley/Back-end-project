@@ -10,7 +10,6 @@ const selectArticles = (queryObj) => {
 			if (queryObj.topic) query.where({ topic: queryObj.topic });
 		})
 		.then((articles) => {
-			console.log(articles);
 			if (articles.length === 0)
 				return Promise.reject({
 					status: 404,
@@ -79,7 +78,7 @@ const insertComment = (comment, article_id) => {
 			author: formatComment.author
 		})
 		.then((comment) => {
-			return comment[0];
+			return { comment: { comment }.comment[0] };
 		});
 };
 

@@ -22,7 +22,16 @@ const addToCommentVotes = (req, res, next) => {
 	const incrementBy = req.body.inc_votes;
 	incrementVote(incrementBy, comment_id)
 		.then((comment) => {
-			res.status(200).send(comment);
+			if (!incrementBy) {
+				res.status(200).send({ comment: { comment }.comment });
+			} else if (typeof incrementBy !== 'number') {
+				return Promise.reject({
+					status: 400,
+					msg: 'Bad request'
+				});
+			} else {
+				res.status(200).send({ comment: { comment }.comment });
+			}
 		})
 		.catch(next);
 };
