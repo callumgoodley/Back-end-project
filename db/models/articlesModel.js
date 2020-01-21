@@ -92,11 +92,6 @@ const selectComments = (article_id, query) => {
 		})
 		.orderBy(query.sort_by || 'created_at', query.order_by || 'desc')
 		.then((comments) => {
-			if (typeof article_id !== 'number')
-				return Promise.reject({
-					status: 404,
-					msg: 'Not found'
-				});
 			return comments;
 		});
 };
