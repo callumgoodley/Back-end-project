@@ -112,12 +112,12 @@ describe('/api', () => {
 		});
 		it('GET 200: responds with an empty array when author has no articles', () => {
 			return request(app).get('/api/articles?author=lurker').expect(200).then((res) => {
-				expect(res.body.articles).to.be.an('array');
+				expect(res.body.articles).to.eql([]);
 			});
 		});
 		it('GET 200: responds with an empty array when topic has no articles', () => {
 			return request(app).get('/api/articles?topic=paper').expect(200).then((res) => {
-				expect(res.body.articles).to.be.an('array');
+				expect(res.body.articles).to.eql([]);
 			});
 		});
 		it('GET 404: responds with 404 not found when provided with a non-existent author', () => {
@@ -208,14 +208,11 @@ describe('/api', () => {
 						expect(res.body.comments[0].article_id).to.equal(1);
 					});
 				});
-				it.only(
-					'GET 200: responds with an empty array of comments for a given article when it has no comments',
-					() => {
-						return request(app).get('/api/articles/2/comments').expect(200).then((res) => {
-							expect(res.body).to.eql([]);
-						});
-					}
-				);
+				it('GET 200: responds with an empty array of comments for a given article when it has no comments', () => {
+					return request(app).get('/api/articles/2/comments').expect(200).then((res) => {
+						expect(res.body).to.eql([]);
+					});
+				});
 				it('POST 201: takes an object of username and body then responds with users comment', () => {
 					return request(app)
 						.post('/api/articles/1/comments')
