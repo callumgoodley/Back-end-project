@@ -110,8 +110,18 @@ describe('/api', () => {
 				expect(res.body.articles[0].author).to.equal('icellusedkars');
 			});
 		});
-		it('GET 400: responds with 400 not found when provided with a non-existent author', () => {
-			return request(app).get('/api/articles/not-an-author').expect(400);
+		it('GET 200: responds with an empty array when author has no articles', () => {
+			return request(app).get('/api/articles?author=lurker').expect(200).then((res) => {
+				expect(res.body.articles).to.be.an('array');
+			});
+		});
+		it('GET 200: responds with an empty array when topic has no articles', () => {
+			return request(app).get('/api/articles?topic=paper').expect(200).then((res) => {
+				expect(res.body.articles).to.be.an('array');
+			});
+		});
+		it('GET 404: responds with 404 not found when provided with a non-existent author', () => {
+			return request(app).get('/api/articles?author=not-author').expect(404);
 		});
 		it('GET 200: responds with an array of article objects that on a certain topic', () => {
 			return request(app).get('/api/articles?topic=cats').expect(200).then((res) => {
@@ -129,7 +139,7 @@ describe('/api', () => {
 			});
 		});
 		it('GET 404: responds with 404 not found when provided with a non-existent topic', () => {
-			return request(app).get('/api/articles/?topic=not-a-topic').expect(404);
+			return request(app).get('/api/articles?topic=not-topic').expect(404);
 		});
 		it('INVALID METHOD 405', () => {
 			const invalidMethods = [ 'patch', 'put', 'delete' ];
@@ -143,8 +153,9 @@ describe('/api', () => {
 		describe('/:article_id', () => {
 			it('GET 200: responds with a specified article object according to article_id', () => {
 				return request(app).get('/api/articles/1').then((res) => {
-					expect(res.body).to.be.an('object');
-					expect(res.body).to.contain.keys(
+					console.log(res.body.article);
+					expect(res.body.article).to.be.an('object');
+					expect(res.body.article).to.contain.keys(
 						'article_id',
 						'title',
 						'body',
@@ -154,22 +165,24 @@ describe('/api', () => {
 						'created_at',
 						'comment_count'
 					);
-					expect(res.body.article_id).to.equal(1);
-					expect(res.body.comment_count).to.equal(13);
+					expect(res.body.article.article_id).to.equal(1);
+					expect(res.body.article.comment_count).to.equal(13);
 				});
 			});
 			it('PATCH 200: takes increment votes obj and adds the value to article votes', () => {
 				return request(app).patch('/api/articles/1').send({ inc_votes: 1 }).expect(200).then((res) => {
-					expect(res.body).to.eql({
-						article_id: 1,
-						title: 'Living in the shadow of a great man',
-						body: 'I find this existence challenging',
-						votes: 101,
-						topic: 'mitch',
-						author: 'butter_bridge',
-						created_at: '+050843-01-19T05:02:51.000Z',
-						comment_count: 13
-					});
+					expect(res.body.article).to.be.an('object');
+					expect(res.body.article).to.contain.keys(
+						'article_id',
+						'title',
+						'body',
+						'votes',
+						'topic',
+						'author',
+						'created_at',
+						'comment_count'
+					);
+					expect(res.body.article.comment_count).to.equal(13);
 				});
 			});
 			it('PATCH 400: responds with with 400 bad request when invalid request is sent', () => {
@@ -195,6 +208,14 @@ describe('/api', () => {
 						expect(res.body.comments[0].article_id).to.equal(1);
 					});
 				});
+				it.only(
+					'GET 200: responds with an empty array of comments for a given article when it has no comments',
+					() => {
+						return request(app).get('/api/articles/2/comments').expect(200).then((res) => {
+							expect(res.body).to.eql([]);
+						});
+					}
+				);
 				it('POST 201: takes an object of username and body then responds with users comment', () => {
 					return request(app)
 						.post('/api/articles/1/comments')

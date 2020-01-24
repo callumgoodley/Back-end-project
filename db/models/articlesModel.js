@@ -1,5 +1,41 @@
 const connection = require('../connection');
 
+const checkAuthorExists = (queryObj) => {
+	const key = Object.keys(queryObj)[0];
+	const value = queryObj[key];
+	return connection.select('*').from(`users`).where(`username`, value).then((result) => {
+		if (result.length === 0)
+			return Promise.reject({
+				status: 404,
+				msg: 'Not Found'
+			});
+		else return [];
+	});
+};
+const checkTopicExists = (queryObj) => {
+	const key = Object.keys(queryObj)[0];
+	const value = queryObj[key];
+	return connection.select('*').from(`topics`).where(`slug`, value).then((result) => {
+		if (result.length === 0)
+			return Promise.reject({
+				status: 404,
+				msg: 'Not Found'
+			});
+		else return [];
+	});
+};
+
+const checkArticleExists = (article_id) => {
+	return connection.select('*').from('articles').where('article_id', article_id).then((result) => {
+		if (result.length === 0)
+			return Promise.reject({
+				status: 404,
+				msg: 'Not found'
+			});
+		else return [];
+	});
+};
+
 const selectArticles = (queryObj) => {
 	return connection
 		.select('*')
@@ -10,12 +46,28 @@ const selectArticles = (queryObj) => {
 			if (queryObj.topic) query.where({ topic: queryObj.topic });
 		})
 		.then((articles) => {
-			if (articles.length === 0)
+			if (articles.length === 0 && queryObj.author) {
+				return checkAuthorExists(queryObj);
+			} else if (articles.length === 0 && !queryObj.topic) {
 				return Promise.reject({
 					status: 404,
 					msg: 'Not Found'
 				});
-			return articles;
+			} else {
+				return articles;
+			}
+		})
+		.then((articles) => {
+			if (articles.length === 0 && queryObj.topic) {
+				return checkTopicExists(queryObj);
+			} else if (articles.length === 0 && !queryObj.author) {
+				return Promise.reject({
+					status: 404,
+					msg: 'Not Found'
+				});
+			} else {
+				return articles;
+			}
 		});
 };
 
@@ -78,7 +130,8 @@ const insertComment = (comment, article_id) => {
 			author: formatComment.author
 		})
 		.then((comment) => {
-			return { comment: { comment }.comment[0] };
+			console.log(comment[0]);
+			return comment[0];
 		});
 };
 
@@ -91,7 +144,16 @@ const selectComments = (article_id, query) => {
 		})
 		.orderBy(query.sort_by || 'created_at', query.order_by || 'desc')
 		.then((comments) => {
-			return comments;
+			if (comments.length === 0 && article_id) {
+				return checkArticleExists(article_id);
+			} else if (comments.length === 0 && !article_id) {
+				return Promise.reject({
+					status: 404,
+					msg: 'Not Found'
+				});
+			} else {
+				return comments;
+			}
 		});
 };
 

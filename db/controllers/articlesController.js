@@ -19,7 +19,7 @@ const getArticlesById = (req, res, next) => {
 	const article_id = req.params.article_id;
 	selectArticlesById(article_id)
 		.then((article) => {
-			res.status(200).send({ article }.article);
+			res.status(200).send({ article });
 		})
 		.catch(next);
 };
@@ -29,7 +29,7 @@ const addToArticleVotes = (req, res, next) => {
 	const article_id = req.params.article_id;
 	incrementVote(incrementBy, article_id)
 		.then((article) => {
-			res.status(200).send({ article }.article);
+			res.status(200).send({ article });
 		})
 		.catch(next);
 };
@@ -40,7 +40,7 @@ const addComment = (req, res, next) => {
 
 	insertComment(commentObj, article_id)
 		.then((comment) => {
-			res.status(201).send({ comment }.comment);
+			res.status(201).send({ comment });
 		})
 		.catch(next);
 };
@@ -51,7 +51,7 @@ const getArticleComments = (req, res, next) => {
 	selectComments(article_id, query)
 		.then((comments) => {
 			if (comments.length === 0) {
-				res.status(404).send({ msg: 'Not found' });
+				res.status(200).send([]);
 			} else {
 				res.status(200).send({ comments });
 			}
