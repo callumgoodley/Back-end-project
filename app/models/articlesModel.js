@@ -90,7 +90,6 @@ const selectArticlesById = (article_id) => {
 					msg: 'Not found'
 				});
 			article.comment_count = Number(article.comment_count);
-			console.log(article);
 			return article;
 		});
 };
