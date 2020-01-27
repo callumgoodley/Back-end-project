@@ -1,4 +1,4 @@
-const connection = require('../connection');
+const connection = require('../../db/connection');
 
 const selectTopics = () => {
 	return connection.select('*').from('topics');

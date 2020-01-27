@@ -1,4 +1,4 @@
-const connection = require('../connection');
+const connection = require('../../db/connection');
 
 const checkAuthorExists = (queryObj) => {
 	const key = Object.keys(queryObj)[0];
@@ -105,6 +105,7 @@ const incrementVote = (incrementBy, article_id) => {
 		.groupBy('articles.article_id')
 		.where('articles.article_id', article_id)
 		.then((article) => {
+			if (!incrementBy) return article;
 			if (typeof incrementBy !== 'number')
 				return Promise.reject({
 					status: 400,
@@ -151,7 +152,7 @@ const selectComments = (article_id, query) => {
 		.where({
 			article_id: article_id
 		})
-		.orderBy(query.sort_by || 'created_at', query.order_by || 'desc')
+		.orderBy(query.sort_by || 'created_at', query.order || 'desc')
 		.then((comments) => {
 			if (comments.length === 0 && article_id) {
 				return checkArticleExists(article_id);

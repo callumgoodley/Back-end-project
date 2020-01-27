@@ -1,10 +1,5 @@
 const commentsRouter = require('express').Router();
-const {
-	getComments,
-	getCommentById,
-	addToCommentVotes,
-	removeComment
-} = require('../../db/controllers/commentsController');
+const { getComments, getCommentById, addToCommentVotes, removeComment } = require('../controllers/commentsController');
 const { send405Error } = require('../errors/index');
 
 commentsRouter.route('/').get(getComments).all(send405Error);

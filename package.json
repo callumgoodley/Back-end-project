@@ -15,7 +15,7 @@
 		"test": "mocha spec/app.spec.js",
 		"seed-test": "mocha db/seeds/spec",
 		"utils-test": "mocha db/utils/spec",
-		"app-test": "mocha db/app/spec"
+		"app-test": "mocha app/spec"
 	},
 	"repository": {
 		"type": "git",

@@ -4,7 +4,7 @@ const request = require('supertest');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('sams-chai-sorted'));
-const connection = require('../../connection');
+const connection = require('../../db/connection');
 const types = require('pg').types;
 
 describe('/api', () => {
@@ -188,6 +188,9 @@ describe('/api', () => {
 			it('PATCH 400: responds with with 400 bad request when invalid request is sent', () => {
 				return request(app).patch('/api/articles/1').send({ inc_votes: 'hello' }).expect(400);
 			});
+			it('PATCH 200: responds with with 200 and an unaffected when invalid request is sent', () => {
+				return request(app).patch('/api/articles/1').send({}).expect(200);
+			});
 			it('GET 404: responds with 404 not found when a valid request is made for article that does not exist', () => {
 				return request(app).get('/api/articles/43364').expect(404);
 			});
@@ -248,7 +251,7 @@ describe('/api', () => {
 				});
 				it('GET 200: responds with an array of comment objects sorted by the column specified in query and ordered as specified', () => {
 					return request(app)
-						.get('/api/articles/1/comments?sort_by=votes&&order_by=asc')
+						.get('/api/articles/1/comments?sort_by=votes&&order=asc')
 						.expect(200)
 						.then((res) => {
 							expect(res.body.comments).to.be.sortedBy('votes', { ascending: true });
