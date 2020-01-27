@@ -2,7 +2,7 @@ exports.formatDates = (list) => {
 	const newArr = [ ...list ];
 
 	const newObjs = newArr.map((article) => ({ ...article }));
-	newObjs.map((article) => (article.created_at = new Date(article.created_at * 1000)));
+	newObjs.map((article) => (article.created_at = new Date(article.created_at)));
 
 	return newObjs;
 };
@@ -15,7 +15,7 @@ exports.makeRefObj = (data, key, value) => {
 	return obj;
 };
 
-exports.formatComments = (comments, articleRef, oldKeyOne, oldKeyTwo, newKeyOne, newKeyTwo) => {
+exports.formatComments = (comments, articleRef) => {
 	const newArr = [ ...comments ];
 
 	const newObjs = newArr.map((commentObj) => ({ ...commentObj }));

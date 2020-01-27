@@ -45,8 +45,8 @@ const selectArticles = (queryObj) => {
 		.orderBy(queryObj.sort_by || 'created_at', queryObj.order || 'desc')
 		.groupBy('articles.article_id')
 		.modify((query) => {
-			if (queryObj.author) query.where({ author: queryObj.author });
-			if (queryObj.topic) query.where({ topic: queryObj.topic });
+			if (queryObj.author) query.where({ 'articles.author': queryObj.author });
+			if (queryObj.topic) query.where({ 'articles.topic': queryObj.topic });
 		})
 		.then((articles) => {
 			if (articles.length === 0 && queryObj.author) {

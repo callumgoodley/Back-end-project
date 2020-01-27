@@ -19,8 +19,8 @@ app.use((err, req, res, next) => {
 		'42702': err.msg,
 		'23503': err.msg
 	};
-	if (err.code === '23503') res.status(404).send({ msg: err.message });
-	if (Object.keys(psqlCodes).includes(err.code)) res.status(400).send({ msg: err.message });
+	if (err.code === '23503') res.status(404).send({ msg: 'Not found' });
+	if (Object.keys(psqlCodes).includes(err.code)) res.status(400).send({ msg: 'Bad request' });
 	else next(err);
 });
 

@@ -87,7 +87,7 @@ describe('/api', () => {
 		});
 		it('GET 200: responds with an array of article objects sorted by the created_at in descending order as default', () => {
 			return request(app).get('/api/articles').expect(200).then((res) => {
-				expect(res.body.articles).to.be.sortedBy('create_at', { descending: true });
+				expect(res.body.articles).to.be.sortedBy('created_at', { descending: true });
 			});
 		});
 		it('GET 200: responds with an array of article objects sorted by the topic specified in query and ordered as specified', () => {
