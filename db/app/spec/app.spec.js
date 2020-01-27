@@ -80,7 +80,8 @@ describe('/api', () => {
 					'votes',
 					'topic',
 					'author',
-					'created_at'
+					'created_at',
+					'comment_count'
 				);
 			});
 		});
@@ -90,7 +91,7 @@ describe('/api', () => {
 			});
 		});
 		it('GET 200: responds with an array of article objects sorted by the topic specified in query and ordered as specified', () => {
-			return request(app).get('/api/articles?sort_by=votes&&order_by=asc').expect(200).then((res) => {
+			return request(app).get('/api/articles?sort_by=votes&&order=asc').expect(200).then((res) => {
 				expect(res.body.articles).to.be.an('array');
 				expect(res.body.articles).to.be.sortedBy('votes', { ascending: true });
 			});
@@ -153,7 +154,6 @@ describe('/api', () => {
 		describe('/:article_id', () => {
 			it('GET 200: responds with a specified article object according to article_id', () => {
 				return request(app).get('/api/articles/1').then((res) => {
-					console.log(res.body.article);
 					expect(res.body.article).to.be.an('object');
 					expect(res.body.article).to.contain.keys(
 						'article_id',
@@ -210,7 +210,7 @@ describe('/api', () => {
 				});
 				it('GET 200: responds with an empty array of comments for a given article when it has no comments', () => {
 					return request(app).get('/api/articles/2/comments').expect(200).then((res) => {
-						expect(res.body).to.eql([]);
+						expect(res.body).to.eql({ comments: [] });
 					});
 				});
 				it('POST 201: takes an object of username and body then responds with users comment', () => {
@@ -231,6 +231,15 @@ describe('/api', () => {
 							expect(res.body.comment.author).to.equal('butter_bridge');
 							expect(res.body.comment.body).to.equal('VERY NICE');
 						});
+				});
+				it('POST 404: responds with 404 not found when post does not have an existing article number', () => {
+					return request(app)
+						.post('/api/articles/1000000/comments')
+						.send({ username: 'butter_bridge', body: 'VERY NICE' })
+						.expect(404);
+				});
+				it('POST 400: responds with 400 bad request when post request does not have the required keys', () => {
+					return request(app).post('/api/articles/1/comments').send({ body: 'hello world' }).expect(400);
 				});
 				it('GET 200: responds with an array of comment objects ordered most recent first as a default i.e. created_at & descending', () => {
 					return request(app).get('/api/articles/1/comments').expect(200).then((res) => {
@@ -323,6 +332,9 @@ describe('/api', () => {
 					expect(res.body.comment.votes).to.equal(15);
 				});
 			});
+			it('PATCH 404 gives 404 when non-existent id comment id is used', () => {
+				return request(app).patch('/api/comments/10000').send({ inc_votes: -1 }).expect(404);
+			});
 			it('PATCH 400: responds with 400 bad request when invalid request is made', () => {
 				return request(app).patch('/api/comments/1').send({ inc_votes: 'abc' }).expect(400);
 			});
@@ -358,6 +370,9 @@ describe('/api', () => {
 			});
 			it('DELETE 400: responds with 400 when passed an invalid comment to delete', () => {
 				return request(app).delete('/api/comments/not-a-number').expect(400);
+			});
+			it('DELETE 404; responds with 404 when passed an non existent comment_id', () => {
+				return request(app).delete('/api/comments/1000000000').expect(404);
 			});
 		});
 	});

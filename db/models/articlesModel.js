@@ -38,9 +38,12 @@ const checkArticleExists = (article_id) => {
 
 const selectArticles = (queryObj) => {
 	return connection
-		.select('*')
+		.select('articles.*')
+		.count({ comment_count: 'comment_id' })
 		.from('articles')
-		.orderBy(queryObj.sort_by || 'created_at', queryObj.order_by || 'desc')
+		.leftJoin('comments', 'articles.article_id', 'comments.article_id')
+		.orderBy(queryObj.sort_by || 'created_at', queryObj.order || 'desc')
+		.groupBy('articles.article_id')
 		.modify((query) => {
 			if (queryObj.author) query.where({ author: queryObj.author });
 			if (queryObj.topic) query.where({ topic: queryObj.topic });
@@ -87,6 +90,7 @@ const selectArticlesById = (article_id) => {
 					msg: 'Not found'
 				});
 			article.comment_count = Number(article.comment_count);
+			console.log(article);
 			return article;
 		});
 };
@@ -116,28 +120,33 @@ const incrementVote = (incrementBy, article_id) => {
 };
 
 const insertComment = (comment, article_id) => {
-	const formatComment = { ...comment };
-	formatComment.author = formatComment.username;
-	formatComment.article_id = article_id;
-	delete formatComment.username;
+	if ('username' in comment && 'body' in comment) {
+		const formatComment = { ...comment };
+		formatComment.author = formatComment.username;
+		formatComment.article_id = article_id;
+		delete formatComment.username;
 
-	return connection('comments')
-		.insert(formatComment)
-		.returning('*')
-		.where({
-			article_id: formatComment.article_id,
-			body: formatComment.body,
-			author: formatComment.author
-		})
-		.then((comment) => {
-			console.log(comment[0]);
-			return comment[0];
+		return connection('comments')
+			.insert(formatComment)
+			.returning('*')
+			.where({
+				article_id: formatComment.article_id,
+				body: formatComment.body,
+				author: formatComment.author
+			})
+			.then((comment) => {
+				return comment[0];
+			});
+	} else
+		return Promise.reject({
+			status: 400,
+			msg: 'Bad request'
 		});
 };
 
 const selectComments = (article_id, query) => {
 	return connection
-		.select('*')
+		.select('comments.*')
 		.from('comments')
 		.where({
 			article_id: article_id

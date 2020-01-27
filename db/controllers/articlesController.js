@@ -50,11 +50,7 @@ const getArticleComments = (req, res, next) => {
 	const query = req.query;
 	selectComments(article_id, query)
 		.then((comments) => {
-			if (comments.length === 0) {
-				res.status(200).send([]);
-			} else {
-				res.status(200).send({ comments });
-			}
+			res.status(200).send({ comments });
 		})
 		.catch(next);
 };
