@@ -139,6 +139,22 @@ describe('/api', () => {
 				expect(res.body.articles[0].topic).to.equal('cats');
 			});
 		});
+		it('PATCH 200: takes increment votes obj and adds the value to article votes', () => {
+			return request(app).patch('/api/articles/1').send({ inc_votes: 1 }).expect(200).then((res) => {
+				expect(res.body.article).to.be.an('object');
+				expect(res.body.article).to.contain.keys(
+					'article_id',
+					'title',
+					'body',
+					'votes',
+					'topic',
+					'author',
+					'created_at',
+					'comment_count'
+				);
+				expect(res.body.article.votes).to.equal(101);
+			});
+		});
 		it('GET 404: responds with 404 not found when provided with a non-existent topic', () => {
 			return request(app).get('/api/articles?topic=not-topic').expect(404);
 		});
@@ -182,14 +198,27 @@ describe('/api', () => {
 						'created_at',
 						'comment_count'
 					);
-					expect(res.body.article.comment_count).to.equal(13);
+					expect(res.body.article.votes).to.equal(101);
 				});
 			});
 			it('PATCH 400: responds with with 400 bad request when invalid request is sent', () => {
 				return request(app).patch('/api/articles/1').send({ inc_votes: 'hello' }).expect(400);
 			});
 			it('PATCH 200: responds with with 200 and an unaffected when invalid request is sent', () => {
-				return request(app).patch('/api/articles/1').send({}).expect(200);
+				return request(app).patch('/api/articles/1').send({}).expect(200).then((res) => {
+					expect(res.body.article).to.be.an('object');
+					expect(res.body.article).to.contain.keys(
+						'article_id',
+						'title',
+						'body',
+						'votes',
+						'topic',
+						'author',
+						'created_at',
+						'comment_count'
+					);
+					expect(res.body.article.votes).to.equal(100);
+				});
 			});
 			it('GET 404: responds with 404 not found when a valid request is made for article that does not exist', () => {
 				return request(app).get('/api/articles/43364').expect(404);

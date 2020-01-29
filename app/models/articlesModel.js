@@ -104,18 +104,19 @@ const incrementVote = (incrementBy, article_id) => {
 		.groupBy('articles.article_id')
 		.where('articles.article_id', article_id)
 		.then((article) => {
-			if (!incrementBy) return article;
-			if (typeof incrementBy !== 'number')
+			if (!incrementBy) {
+				return article;
+			} else if (typeof incrementBy !== 'number') {
 				return Promise.reject({
 					status: 400,
 					msg: 'Bad request'
 				});
-			article.comment_count = Number(article.comment_count);
-			return article;
-		})
-		.then((article) => {
-			article.votes += incrementBy;
-			return article;
+			} else {
+				if (!incrementBy) return article;
+				article.vote = Number(article.vote);
+				article.votes += incrementBy;
+				return article;
+			}
 		});
 };
 
