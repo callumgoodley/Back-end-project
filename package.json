@@ -15,7 +15,11 @@
 		"test": "mocha spec/app.spec.js",
 		"seed-test": "mocha db/seeds/spec",
 		"utils-test": "mocha db/utils/spec",
-		"app-test": "mocha app/spec"
+		"app-test": "mocha app/spec",
+		"start": "node listen.js",
+		"seed:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex seed:run",
+		"migrate-latest:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest",
+		"migrate-rollback:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback"
 	},
 	"repository": {
 		"type": "git",

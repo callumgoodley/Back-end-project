@@ -10,6 +10,11 @@ const types = require('pg').types;
 describe('/api', () => {
 	beforeEach(() => connection.seed.run());
 	after(() => connection.destroy());
+	it.only('GET 200: responds with JSON of all endpoints in API', () => {
+		return request(app).get('/').expect(200).then((res) => {
+			console.log(res);
+		});
+	});
 	it('INVALID METHOD 405', () => {
 		const invalidMethods = [ 'delete' ];
 		const methodPromises = invalidMethods.map((method) => {
