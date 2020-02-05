@@ -24,7 +24,7 @@ const incrementVote = (incrementBy, comment_id) => {
 			} else if (!incrementBy) {
 				return comment;
 			}
-
+			comment.votes += incrementBy;
 			return comment;
 		});
 };
