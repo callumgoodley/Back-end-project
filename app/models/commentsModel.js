@@ -14,7 +14,7 @@ const incrementVote = (incrementBy, comment_id) => {
 	return connection('comments')
 		.first('*')
 		.where('comment_id', comment_id)
-		.increment('comments.votes', increment_by)
+		.increment('votes', increment_by)
 		.then((comment) => {
 			if (!comment) {
 				return Promise.reject({
@@ -24,7 +24,6 @@ const incrementVote = (incrementBy, comment_id) => {
 			} else if (!incrementBy) {
 				return comment;
 			}
-			comment.votes += incrementBy;
 			return comment;
 		});
 };
