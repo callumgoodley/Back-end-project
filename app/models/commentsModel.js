@@ -11,9 +11,7 @@ const selectCommentById = (comment_id) => {
 };
 
 const checkCommentExists = (increment_by, comment_id) => {
-	console.log(increment_by, comment_id);
 	return connection.select('*').from(`comments`).where(`comment_id`, comment_id).then((result) => {
-		console.log(result.length);
 		if (result.length === 0)
 			return Promise.reject({
 				status: 404,

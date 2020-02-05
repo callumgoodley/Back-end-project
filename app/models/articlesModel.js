@@ -95,6 +95,7 @@ const selectArticlesById = (article_id) => {
 };
 
 const incrementVote = (incrementBy, article_id) => {
+	if (!incrementBy) incrementBy = 0;
 	return connection
 		.first('articles.*')
 		.count({ comment_count: 'comment_id' })
@@ -103,19 +104,16 @@ const incrementVote = (incrementBy, article_id) => {
 		.orderBy('article_id')
 		.groupBy('articles.article_id')
 		.where('articles.article_id', article_id)
+		.increment('votes', incrementBy)
+		.returning('*')
 		.then((article) => {
 			if (!incrementBy) {
-				return article;
-			} else if (typeof incrementBy !== 'number') {
-				return Promise.reject({
-					status: 400,
-					msg: 'Bad request'
-				});
+				return article[0];
+			} else if (incrementBy.length === 0 && article_id) {
+				return checkArticleExists(article_id);
 			} else {
-				if (!incrementBy) return article;
-				article.vote = Number(article.vote);
-				article.votes += incrementBy;
-				return article;
+				console.log(article);
+				return article[0];
 			}
 		});
 };
