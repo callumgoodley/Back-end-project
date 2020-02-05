@@ -11,18 +11,22 @@ const selectCommentById = (comment_id) => {
 };
 
 const incrementVote = (incrementBy, comment_id) => {
-	return connection('comments').first('*').where('comment_id', comment_id).then((comment) => {
-		if (!comment) {
-			return Promise.reject({
-				status: 404,
-				msg: 'Not found'
-			});
-		} else if (!incrementBy) {
+	return connection('comments')
+		.first('*')
+		.where('comment_id', comment_id)
+		.increment('votes', increment_by)
+		.then((comment) => {
+			if (!comment) {
+				return Promise.reject({
+					status: 404,
+					msg: 'Not found'
+				});
+			} else if (!incrementBy) {
+				return comment;
+			}
+
 			return comment;
-		}
-		comment.votes += incrementBy;
-		return comment;
-	});
+		});
 };
 
 const deleteComment = (comment_id) => {
